@@ -427,7 +427,7 @@ class DbManager
             array_push($params, $bindParams[$prop]);
         }
 
-        call_user_func_array(array($stmt, 'bind_param'), $this->refValues($params));       
+        @call_user_func_array(array($stmt, 'bind_param'), $this->refValues($params));       
         
         $stmt->execute();
         $query_result=$stmt->get_result();
