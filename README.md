@@ -43,7 +43,7 @@ This sets value of column1 as value1,column2 as value2 and so on!
 
 You can specify where condition in $where array(optional)
 ```php
-$where=array("id"=>"1");This update only those rows whose id column has value 1;
+$where=array("id"=>"1");//This update only those rows whose id column has value 1;
 ```       
    
  
@@ -54,7 +54,7 @@ $num=$db->countFromArray($table,$where);
 ```  
 You can specify where condition in $where array(optional)
 ```php  
-$where=array("id"=>"1");This counts only those rows whose id column has value 1;
+$where=array("id"=>"1");//This counts only those rows whose id column has value 1;
 ``` 
 
 
@@ -65,7 +65,7 @@ $row=$db->getRowFromArray($table,$fields,$where);
 ```  
 You can specify where condition in $where array(optional)
 ```php
-$where=array("id"=>"1");This returns the row whose id column has value 1;
+$where=array("id"=>"1");//This returns the row whose id column has value 1;
 ```      
 The result $row is an associative array whose key are fields of array $fields and value maps to the resuls from query
 But, if you demand only element in $fields array, you get string! 
