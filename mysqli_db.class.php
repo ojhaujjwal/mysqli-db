@@ -160,10 +160,10 @@ class DbManager
 
 
     /*
-    **  @function insertFromArray   --  inserts new set of data to table by escaping data
+    **  @function insert   --  inserts new set of data to table by escaping data
     **  @param associative array $data  --   data to be inserted in table 
     */
-    public function insertFromArray($table, $data)
+    public function insert($table, $data)
     {
         $query_col = array();
         $query_v = array();
@@ -279,12 +279,12 @@ class DbManager
 
 
     /*
-    **  @function updateFromArray   -- updates table using array as arguments
+    **  @function update   -- updates table using array as arguments
     **  @new way to update, uses prepared statements(i.e. safeQuery method)
     **  @param string  $table   --  table to be updated 
     **  @param associative array $where  --   where condition 
     */
-    public function updateFromArray($table, $data, $where)
+    public function update($table, $data, $where)
     {        
         $query_v = array();
                 
@@ -346,11 +346,11 @@ class DbManager
     }
 
     /*
-    **  @function countFromArray    -- counts num of results using array as argument, use safeQuery method(preparing)
+    **  @function countRows    -- counts num of results using array as argument, use safeQuery method(preparing)
     **  @param string  $table   --  table to be updated 
     **  @param associative array $where  --   where condition 
     */
-    public function countFromArray($table,$where=array()){
+    public function countRows($table,$where=array()){
         return $this->getRowFromArray($table,array("count(*)"),$where);
     }
 
@@ -393,14 +393,27 @@ class DbManager
     }
 
     /*
-    **  @function getRowFromArray    --  returns first result of select query taking array as arguments
+    **  @function row    --  returns first result of select query taking array as arguments
     **  @param string  $table   --  table name
     **  @param array fields -- array of fields 
     **  @param associative array optional $where  --   where condition 
     */
-    public function getRowFromArray($table,$fields,$where=array()){
+    public function row($table,$fields,$where=array()){
         
         return $this->getRow($this->selectFromArray($table,$fields,$where));
+    }
+
+    public function value($table,$field,$where=array()){
+        list($value) = $this->row($table,array($field),$where);
+        return $value;
+    }
+
+    public function column($table,$field,$where=array()){
+        $rows = $this->multiRows($table,array($field),$where);
+        foreach($rows as $row){
+            $results[]=reset($row);
+        }
+        return $results;
     }
 
 
@@ -414,14 +427,7 @@ class DbManager
         }else{
             $results=array();
             while($row=$res->fetch_assoc()){
-                if(count($row)==1){
-                    $value=reset($row);
-                   
-                    $results[]=$value;
-                }else{
-                    $results[]=$row;        
-                }
-                        
+                $results[]=$row;                                
             }
             return $results;              
         }        
@@ -436,23 +442,23 @@ class DbManager
     }
 
     /*
-    **  @function getRowFromArray    --  returns all rows of select query taking array as arguments
+    **  @function multiRows    --  returns all rows of select query taking array as arguments
     **  @param string  $table   --  table name
     **  @param array fields -- array of fields 
     **  @param associative array optional $where  --   where condition 
     */
-    public function getMultiRowFromArray($table,$fields,$where=array()){
+    public function multiRows($table,$fields,$where=array()){
         
         return $this->getMultiRow($this->selectFromArray($table,$fields,$where));        
     }
 
 
     /*
-    **  @function deleteFromArray   --  delete rows of table taking array as arguments
+    **  @function delete   --  delete rows of table taking array as arguments
     **  @param string  $table   --  table name
     **  @param associative array optional $where  --   where condition 
     */
-    public function deleteFromArray($table,$where=array()){
+    public function delete($table,$where=array()){
         if(empty($where)){
             return $this->query($query);
         }
