@@ -25,7 +25,7 @@ For example, $user_input=$db->escape($_GET);
 ### Inserting Data
 You can insert data in just a step!
 ```php
-$res=$db->insertFromArray($table,$data);
+$res=$db->insert($table,$data);
 //$data is an array like this::
 //$data=array("column1"=>"value1","column2"=>"value2");
 ```    
@@ -34,7 +34,7 @@ $res=$db->insertFromArray($table,$data);
 ### Updating Data   
 Update can be done as follows::
 ```php
-$res=$db->updateFromArray($table, $data, $where);
+$res=$db->update($table, $data, $where);
 //$data is an array like this::
 //$data=array("column1"=>"value1","column2"=>"value2"); 
 ```
@@ -50,7 +50,7 @@ $where=array("id"=>"1");//This update only those rows whose id column has value 
 ### Counting Rows    
 To get the number of results::   
 ```php   
-$num=$db->countFromArray($table,$where); 
+$num=$db->countRows($table,$where); 
 ```  
 You can specify where condition in $where array(optional)
 ```php  
@@ -61,32 +61,43 @@ $where=array("id"=>"1");//This counts only those rows whose id column has value 
 ### Fetching a Single Row  
 To get a row:
 ```php
-$row=$db->getRowFromArray($table,$fields,$where);
+$row=$db->row($table,$fields,$where);
 ```  
 You can specify where condition in $where array(optional)
 ```php
 $where=array("id"=>"1");//This returns the row whose id column has value 1;
 ```      
 The result $row is an associative array whose key are fields of array $fields and value maps to the resuls from query
-But, if you demand only element in $fields array, you get string! 
+
    
 You can also get row in the same format by using query like --
 ```php 
 $row=$db->getRowFromQuery("select name from user where  id='1';");
 ```  
 
+### Fetching a single value
+To fetch a single value:
+```php
+$value=$db->row($table,$field_name,$where);
+// for example, $user_name=$db->row("user","name","id"=>"10");
+```
+
 
 ### Fetching Multiple Rows 
 To get multiple rows you can use array format or from query:
 ```php 
-$rows=$db->getMultiRowFromArray($table,$fields,$where);// $where is optional as always
+$rows=$db->multiRows($table,$fields,$where);// $where is optional as always
 $rows=$db->getMultiRowFromQuery($query);
 ```  
 The result, $rows is a numerical array.
 
-If you demand only element in $fields array, you get string as elements of the array!
+### Fetching a single Column
+To fetch a single value:
+```php
+$value=$db->column($table,$field_name,$where);
+// for example, $user_list=$db->column("user","name");
+```
 
-Else you get an associative array as elements of the array!
 
 
 ### Prepared Statements
@@ -121,12 +132,12 @@ For prepared select statements, use <span>prepareRow</span> or <span>prepareMult
 
 ### prepareRow
  
-This is used to fetch a row and returns result similiar to getRowFromArray!
+This is used to fetch a row and returns result similiar to row!
 
 For example to get user`s name from table user!
 ```php
-$user_name=$db->prepareRow("select user_name from user where user_id=?",$user_id,"i");
-echo $user_name; // will print user name like David Beckham
+$user_data=$db->prepareRow("select user_name,date_of_birth from user where user_id=?",$user_id,"i");
+print_r($user_data);
 ```
 
 
@@ -137,6 +148,6 @@ This is used to fetch multiple rows and returns result similiar to getMultiRowFr
 
 For example to get list of user`s posts from table post!
 ```php
-$posts=$db->prepareRow("select * from post where user_id=?",$user_id,"i");
+$posts=$db->prepareMultiRow("select * from post where user_id=?",$user_id,"i");
 print_r($posts); // will print array
 ```
