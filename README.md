@@ -151,3 +151,25 @@ For example to get list of user`s posts from table post!
 $posts=$db->prepareMultiRow("select * from post where user_id=?",$user_id,"i");
 print_r($posts); // will print array
 ```
+
+
+
+### prepareValue
+ 
+This is used to get value from prepared query!
+
+For example to get user`s name from user table!
+```php
+$name=$db->prepareValue("select name from user where user_id=?",$user_id,"i");
+echo $name; // will print name
+```
+
+### prepareColumn
+ 
+This is used to get a column from prepared query!
+
+For example to get list of user`s post_text from post table!
+```php
+$post_text=$db->prepareColumn("select post_text from post where user_id=?",$user_id,"i");
+print_r($post_text); // will print array
+```
