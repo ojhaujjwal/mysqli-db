@@ -78,8 +78,8 @@ $row=$db->getRowFromQuery("select name from user where  id='1';");
 ### Fetching a single value
 To fetch a single value:
 ```php
-$value=$db->row($table,$field_name,$where);
-// for example, $user_name=$db->row("user","name","id"=>"10");
+$value=$db->value($table,$field_name,$where);
+// for example, $user_name=$db->value("user","name","id"=>"10");
 ```
 
 
@@ -92,10 +92,10 @@ $rows=$db->getMultiRowFromQuery($query);
 The result, $rows is a numerical array.
 
 ### Fetching a single Column
-To fetch a single value:
+To fetch a single column:
 ```php
 $value=$db->column($table,$field_name,$where);
-// for example, $user_list=$db->column("user","name");
+// for example, $user_name_list=$db->column("user","name");
 ```
 
 
@@ -134,7 +134,7 @@ For prepared select statements, use <span>prepareRow</span> or <span>prepareMult
  
 This is used to fetch a row and returns result similiar to row!
 
-For example to get user`s name from table user!
+For example to get user`s data from table user!
 ```php
 $user_data=$db->prepareRow("select user_name,date_of_birth from user where user_id=?",$user_id,"i");
 print_r($user_data);
