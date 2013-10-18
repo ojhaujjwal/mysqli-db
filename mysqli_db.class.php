@@ -410,10 +410,25 @@ class DbManager
 
     public function column($table,$field,$where=array()){
         $rows = $this->multiRows($table,array($field),$where);
+        return $this->convertRowsToColumn($rows);
+    }
+
+    public function valueFromQuery($query){
+        list ($value)=$this->getRowFromQuery($query);
+        return $value;
+    }
+
+    public function columnFromQuery($query){
+        $rows = $this->getMultiRowFromQuery($query);
+        return $this->convertRowsToColumn($rows);
+    }
+
+    private function convertRowsToColumn($rows){
+        $results=array();
         foreach($rows as $row){
             $results[]=reset($row);
         }
-        return $results;
+        return $results;        
     }
 
 
@@ -482,7 +497,7 @@ class DbManager
     **  @function safeQuery  -- prepares query, bind params and executes
     **  @param string $query --  query to be issued
     **  @param (array or string) bindParams -- bind params
-    **  @param (array or string) paramType --  types of bind params
+    **  @param (array or string) (optional) paramType --  types of bind params
     **  @returns result of query
     */
     public function safeQuery($query,$bindParams,$paramType=NULL)
@@ -535,7 +550,7 @@ class DbManager
     **  @function prepareSelect -- calls safeQuery and returns num rows based on @param $numRows
     **  @param string $query --  query to be issued
     **  @param (array or string) bindParams -- bind params
-    **  @param (array or string) paramType --  types of bind params
+    **  @param (array or string) (optional) paramType --  types of bind params
     **  @returns one or more rows based on @param $numRows
     */
     private function prepareSelect($numRows,$query,$bindParams,$paramType){
@@ -553,7 +568,7 @@ class DbManager
     **  @function prepareSelect -- calls safeQuery and returns multiple rows 
     **  @param string $query --  query to be issued
     **  @param (array or string) bindParams -- bind params
-    **  @param (array or string) paramType --  types of bind params
+    **  @param (array or string) (optional) paramType --  types of bind params
     **  @returns multiple rows 
     */
     public function prepareMultiRow($query,$bindParams,$paramType=NULL){
@@ -564,13 +579,35 @@ class DbManager
     **  @function prepareSelect -- calls safeQuery and returns one row 
     **  @param string $query --  query to be issued
     **  @param (array or string) bindParams -- bind params
-    **  @param (array or string) paramType --  types of bind params
+    **  @param (array or string) (optional) paramType --  types of bind params
     **  @returns one row 
     */
     public function prepareRow($query,$bindParams,$paramType=NULL){
         return $this->prepareSelect(1,$query,$bindParams,$paramType);
     }
 
+    /*
+    **  @function prepareValue -- calls safeQuery and returns one value 
+    **  @param string $query --  query to be issued
+    **  @param (array or string) bindParams -- bind params
+    **  @param (array or string) (optional) paramType --  types of bind params
+    **  @returns a value 
+    */
+    public function prepareValue($query,$bindParams,$paramType=NULL){
+        list($value) = $this->prepareRow($query,$bindParams,$paramType);
+        return $value;
+    }
+
+    /*
+    **  @function prepareSelect -- calls safeQuery and returns an array of column
+    **  @param string $query --  query to be issued
+    **  @param (array or string) bindParams -- bind params
+    **  @param (array or string) (optional) paramType --  types of bind params
+    **  @returns array of values 
+    */
+    public function prepareColumn($query,$bindParams,$paramType=NULL){
+        return $this->convertRowsToColumn($this->prepareRow($query,$bindParams,$paramType=NULL));
+    }
 
     /*
     **  @function determineType -- determines type of bind params to prepared query
