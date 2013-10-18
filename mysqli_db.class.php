@@ -186,17 +186,6 @@ class DbManager
         return  $this->query($query);
     }
 
-    public function insertMultiRow($table,$fields,$datas){
-        $question=array();
-        for($i=0;$i<count($fields);$i++){
-            $question[]="?";
-        }
-        $stmt = $dbh->prepare("INSERT INTO $table (" . implode(", ", $fields) . ") VALUES (" . implode(",",$question) . ")");
-        foreach($datas as $data){
-            
-        }
-    }
-
     /*
     **  @function getPreparingWhereConditionFromArray   --  returns where condition for preparing
     **  @param associative array $where  --   where condition
@@ -333,6 +322,9 @@ class DbManager
     **  @param associative array $where  --   where condition 
     */ 
     private function selectFromArray($table,$fields,$where){
+
+        
+
         $query="SELECT ".implode(",",$fields)." FROM $table ";
         if(empty($where)){
             return $this->query($query);
@@ -351,7 +343,7 @@ class DbManager
     **  @param associative array $where  --   where condition 
     */
     public function countRows($table,$where=array()){
-        return $this->getRowFromArray($table,array("count(*)"),$where);
+        return $this->value($table,"count(*)",$where);
     }
 
     /*
@@ -374,12 +366,12 @@ class DbManager
     */
     private function getRow($res){
         
-            if($res && $res->num_rows!==1){
-                throw new \BadMethodCallException("Query returns more than row!");
-            }else{  
-                $rows=$this->getMultiRow($res);
-                return reset($rows);            
-            }
+        if ($res && $res->num_rows !== 1) {
+            throw new \BadMethodCallException("Query returns more than row!");
+        } else {  
+            $rows = $this->getMultiRow($res);
+            return reset($rows);            
+        }
            
     }
 
@@ -404,7 +396,8 @@ class DbManager
     }
 
     public function value($table,$field,$where=array()){
-        list($value) = $this->row($table,array($field),$where);
+        $row=$this->row($table,array($field),$where);
+        $value = reset($row);
         return $value;
     }
 
@@ -414,8 +407,8 @@ class DbManager
     }
 
     public function valueFromQuery($query){
-        list ($value)=$this->getRowFromQuery($query);
-        return $value;
+        $row=$this->getRowFromQuery($query);
+        return reset($row);
     }
 
     public function columnFromQuery($query){
@@ -438,7 +431,7 @@ class DbManager
     */
     private function getMultiRow($res){
         if(!$res){
-            return FALSE;
+            return array();
         }else{
             $results=array();
             while($row=$res->fetch_assoc()){
@@ -503,15 +496,19 @@ class DbManager
     public function safeQuery($query,$bindParams,$paramType=NULL)
     {
         $this->setLastQuery($query);
-        //echo $query;
-        //print_r($bindParams);
+        //echo $query."<br/>";
+        
         if (!is_array($bindParams)) {
             $bindParams = array($bindParams);
         }
-
+        //print_r($bindParams);
         $stmt = $this->mysqli->prepare($query);
-
-            if (!is_null($paramType)) {
+        if ($this->isArrayAssoc($bindParams)) {
+            foreach($bindParams as $key=>$value){
+                $stmt->bind_param($key,$value);
+            }
+        } else {
+           if (!is_null($paramType)) {
                 if (is_array($paramType)) {
                     $params[0] = implode("",$paramType);
                 } else {
@@ -522,15 +519,16 @@ class DbManager
                 $params[0]="";
             }
 
-        foreach ($bindParams as $prop => $val) {
-            if (is_null($paramType)) {
-                $params[0] .= $this->determineType($val);    
-            }
+            foreach ($bindParams as $prop => $val) {
+                if (is_null($paramType)) {
+                    $params[0] .= $this->determineType($val);    
+                }
             
-            array_push($params, $bindParams[$prop]);
+                array_push($params, $bindParams[$prop]);
+            }
+           call_user_func_array(array($stmt, 'bind_param'), $this->refValues($params));             
         }
-        //print_r($this->refValues($params));
-        call_user_func_array(array($stmt, 'bind_param'), $this->refValues($params));       
+      
         
         if (!$stmt->execute()) {
             return FALSE;
@@ -540,6 +538,8 @@ class DbManager
         } else {
             $return_value = TRUE;
         }
+        //var_dump($params);
+        //echo "<br/>";
         $stmt->free_result();
         $stmt->close();
         return $return_value;
@@ -554,8 +554,9 @@ class DbManager
     **  @returns one or more rows based on @param $numRows
     */
     private function prepareSelect($numRows,$query,$bindParams,$paramType){
-
+       
         $query_result=$this->safeQuery($query,$bindParams,$paramType);
+        
         if($numRows==1){
             $results = $this->getRow($query_result);    
         }else{
@@ -594,8 +595,8 @@ class DbManager
     **  @returns a value 
     */
     public function prepareValue($query,$bindParams,$paramType=NULL){
-        list($value) = $this->prepareRow($query,$bindParams,$paramType);
-        return $value;
+        $row = $this->prepareRow($query,$bindParams,$paramType);
+        return reset($row);
     }
 
     /*
@@ -655,6 +656,10 @@ class DbManager
             return $refs;
         }
         return $arr;
+    }
+
+    private function isArrayAssoc($array){
+        return (bool)count(array_filter(array_keys($array), 'is_string'));
     }
 
 }
