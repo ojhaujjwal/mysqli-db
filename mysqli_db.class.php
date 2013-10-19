@@ -1,5 +1,4 @@
 <?php
-    
 namespace library\Mysqli;
 
 class DbManager
@@ -22,44 +21,30 @@ class DbManager
     
     
     /*
-    **  @function __construct    -- call connect_mysqli for initiating connection to mysql
+    **  @function __construct    -- call connect for initiating connection to mysql
     **  @param string optional $dbname  -- database name 
     */
-    public  function __construct($dbname=NULL){
+    public  function __construct($hostname, $dbUser, $dbPassword, $dbname=NULL){
         
-        $this->connect_mysqli($dbname);
+        $this->connect($hostname, $dbUser, $dbPassword);
         
     }
     /*
-    **  @function connect_mysqli    --  initiates connection with mysql
+    **  @function connect    --  initiates connection with mysql
     **  @param string optional $dbname  -- database name
     */
-    public function connect_mysqli($hostname,$dbuser,$dbpassword,$dbname=NULL){
-        
-       if(!isset($this->mysqli)){
-            if(is_null($dbname)){
-                
-                $this->mysqli=new \mysqli($hostname,$dbuser,$dbpassword);
-               
-            }else{
-                
-                $this->mysqli=new \mysqli($hostname,$dbuser,$dbpassword,$dbname);
-                
+    public function connect($hostname, $dbUser, $dbPassword, $dbname=NULL){
+       if (!isset($this->mysqli)) {
+            if (is_null($dbname)) {
+                $this->mysqli = new \mysqli($hostname, $dbUser, $dbPassword);
+            } else {
+                $this->mysqli = new \mysqli($hostname, $dbUser, $dbPassword, $dbname);
             }
             $this->_instance=$this;
             if($this->mysqli->connect_errno){
                 throw new \Exception($this->mysqli->connect_errno);
             }
-                  
        }
-       return $this->mysqli; 
-    }
-
-    /*
-    **  @function last_error    --  last error occured when querying
-    */
-    public function last_error(){
-        return $this->mysqli->error;
     }
 
     /*
@@ -82,20 +67,20 @@ class DbManager
     }
 
     /*
-    **  @function get_instance    --  returns instance of self
+    **  @function getInstance    --  returns instance of self
     **  @param string optional $dbname  -- database name
     */
-    public function get_instance($dbname=NULL){
-        if(!$this->_instance){
-            $this->connect_mysqli($dbname);
+    public function getInstance($dbname=NULL){
+        if (!$this->_instance) {
+            $this->connect($dbname);
         }
         return $this->_instance;
     }
 
     /*
-    **  @function get_current_db    --  returns currently connected database
+    **  @function getCurrentDb    --  returns currently connected database
     */
-    function get_current_db() {
+    function getCurrentDb() {
         return $this->getRowFromQuery("SELECT DATABASE() as db");
     }
 
@@ -120,16 +105,16 @@ class DbManager
     **  @param array $arguments  -- array of arguments
     **  @thrown BadMethodCallException  -- if no method is found in mysqli class
     */
-    public function __call($name,$arguments){
-        if(method_exists($this->mysqli,$name)){
-            return call_user_func_array(array($this->mysqli,$name),$arguments);
+    public function __call($name, $arguments){
+        if(method_exists($this->mysqli, $name)){
+            return call_user_func_array(array($this->mysqli,$name), $arguments);
         }
         throw new \BadMethodCallException("Called to undefined method $name!");
     }
     
 
     public function __get($name){
-        if(property_exists(array($this,$name))){
+        if(property_exists(array($this, $name))){
             return $this->mysqli->$name;
         }
         throw new \Exception("Called to undefined property $name!");
@@ -140,17 +125,17 @@ class DbManager
     **  @param  $var    --  can be array or string  --  the string or array to be escaped
     **  @param bool $recurse_escape --  if set to true and $var is array, escapes all elements of $var array
     */
-    public function escape($var,$recurse_escape=TRUE){
+    public function escape($var, $recurse_escape=TRUE){
        
-        if(!is_array($var)){
-            $res=$this->mysqli->real_escape_string($var);
-        }else{
-            $res=array();
-            foreach($var as $key=>$value){
-                if($recurse_escape){
-                    $res[$key]=$this->escape($value,$recurse_escape);
-                }else{
-                    $res[$key]=$value;
+        if (!is_array($var)) {
+            $res = $this->mysqli->real_escape_string($var);
+        } else {
+            $res = array();
+            foreach ($var as $key=>$value) {
+                if ($recurse_escape) {
+                    $res[$key] = $this->escape($value, $recurse_escape);
+                } else {
+                    $res[$key] = $value;
                 }
                 
             }
@@ -167,15 +152,13 @@ class DbManager
     {
         $query_col = array();
         $query_v = array();
-        $data=$this->escape($data);    
-        foreach($data as $k=>$v)
+        $data = $this->escape($data);    
+        foreach ($data as $k => $v)
         {
             $query_col[] = "`" . $k . "`";
-            if(is_array($v) and isset($v["type"]) and  $v["type"]=='MYSQL_FUNCTION'){
-                
+            if (is_array($v) && isset($v["type"]) &&  $v["type"] == 'MYSQL_FUNCTION') {
                 $query_v[] = $v["value"];
-                
-            }else{
+            } else {
                 $query_v[] = "'$v'";
             }
             
@@ -192,8 +175,8 @@ class DbManager
     */
     private function getPreparingWhereConditionFromArray($where){
 
-        $where=$this->escape($where);
-        foreach($where as $k=>$v)
+        $where = $this->escape($where);
+        foreach ($where as $k => $v)
         {                       
             $query_w[] = "`" . $k .  "`=?";
         }
@@ -202,9 +185,9 @@ class DbManager
     }
 
     private function getPreparingWhereCondition($where){
-        if(empty($where)){
+        if (empty($where)) {
             return "";
-        }else{
+        } else {
             return " WHERE ".$this->getPreparingWhereConditionFromArray($where)." ";
         }
     }
@@ -214,11 +197,11 @@ class DbManager
     **  @param associative array $where  --   where condition
     */
     private function getWhereConditionFromArray($where){
-        if(empty($where)){
+        if (empty($where)) {
             return '';
-        }else{
-            $where=$this->escape($where);
-            foreach($where as $k=>$v)
+        } else {
+            $where = $this->escape($where);
+            foreach ($where as $k => $v)
             {                       
                 $query_w[] = "`" . $k .  "`='" .  $v . "'";
             }
@@ -231,8 +214,8 @@ class DbManager
     **  @param associative array $where  --   where condition
     */
     private function getWhereCondition($where){
-        $where_sql=$this->getWhereConditionFromArray($where);
-        if(empty($where_sql)){
+        $where_sql = $this->getWhereConditionFromArray($where);
+        if (empty($where_sql)) {
             return "";
         }
         return " WHERE ".$where_sql;
@@ -248,21 +231,18 @@ class DbManager
     {        
         $query_v = array();
                 
-        foreach($data as $k=>$v)
+        foreach ($data as $k => $v)
         {            
             $k = $this->escape($k);
-            if(is_array($v) and isset($v["type"]) and  $v["type"]=='MYSQL_FUNCTION'){
+            if (is_array($v) and isset($v["type"]) and  $v["type"] == 'MYSQL_FUNCTION') {
                 $query_v[] = "`" . $k .  "`=" .  $this->escape($v['value']) . "";
-            }else{
+            } else {
                 $query_v[] = "`" . $k .  "`='" . $this->escape($v) . "'";
             }            
             
-            
         }
-        $where_condition=$this->getWhereCondition($where);
-         
+        $where_condition = $this->getWhereCondition($where);
         $query = "UPDATE " . $table . " SET " . implode(", ", $query_v) . "$where_condition";
-        //echo $query;
         return $this->query($query);
     }
 
@@ -279,21 +259,19 @@ class DbManager
                 
         foreach($data as $k=>$v)
         {            
-            $k = $this->escape($k);
-            if(is_array($v) and isset($v["type"]) and  $v["type"]=='MYSQL_FUNCTION'){
+            if (is_array($v) and isset($v["type"]) and  $v["type"] =='MYSQL_FUNCTION') {
                 $query_v[] = "`" . $k .  "`=" .  $this->escape($v['value']);
                 unset($data[$k]);
-            }else{
+            } else {
                 $query_v[] = "`" . $k .  "`=? ";
             }            
             
             
         }
-        $where_condition=$this->getPreparingWhereCondition($where);
-         
+        $where_condition = $this->getPreparingWhereCondition($where);
+
         $query = "UPDATE " . $table . " SET " . implode(", ", $query_v) . "$where_condition";
-        //echo $query;
-        return $this->safeQuery($query,array_merge(array_values($data),array_values($where)));
+        return $this->safeQuery($query, array_merge(array_values($data), array_values($where)));
     }
 
     /*
@@ -308,10 +286,11 @@ class DbManager
     **  @param string  $table   --  table to be updated 
     **  @param associative array $where  --   where condition 
     */ 
-    private function selectFromArrayOld($table,$fields,$where){
-        $where_condition=$this->getWhereCondition($where);
+    private function selectFromArrayOld($table, $fields, $where)
+    {
+        $where_condition = $this->getWhereCondition($where);
  
-        $sql="SELECT ".implode(",",$fields)." FROM $table $where_condition";
+        $sql = "SELECT ".implode(",",$fields)." FROM $table $where_condition";
         
         return $this->query($sql);
     }
@@ -321,20 +300,18 @@ class DbManager
     **  @param string  $table   --  table to be updated 
     **  @param associative array $where  --   where condition 
     */ 
-    private function selectFromArray($table,$fields,$where){
-
-        
-
-        $query="SELECT ".implode(",",$fields)." FROM $table ";
-        if(empty($where)){
+    private function selectFromArray($table, $fields, $where)
+    {
+        $query="SELECT ".implode(",", $fields)." FROM $table ";
+        if (empty($where)) {
             return $this->query($query);
         }
 
-        $where_condition=$this->getPreparingWhereCondition($where);
+        $where_condition = $this->getPreparingWhereCondition($where);
  
-        $query.=$where_condition;
+        $query .= $where_condition;
         
-        return $this->safeQuery($query,array_values($where));
+        return $this->safeQuery($query, array_values($where));
     }
 
     /*
@@ -342,8 +319,9 @@ class DbManager
     **  @param string  $table   --  table to be updated 
     **  @param associative array $where  --   where condition 
     */
-    public function countRows($table,$where=array()){
-        return $this->value($table,"count(*)",$where);
+    public function countRows($table, $where=array())
+    {
+        return $this->value($table, "count(*)", $where);
     }
 
     /*
@@ -352,12 +330,13 @@ class DbManager
     **  @param string  $table   --  table to be updated 
     **  @param associative array $where  --   where condition 
     */
-    public function countFromArrayOld($table,$where=array()){
+    public function countFromArrayOld($table, $where=array())
+    {
 
-        $where_condition=$this->getWhereCondition($where);  
+        $where_condition = $this->getWhereCondition($where);  
    
-        $sql="SELECT count(*) as count FROM $table $where_condition";
-        return $this->getRowFromQuery($sql);
+        $query = "SELECT count(*) as count FROM $table $where_condition";
+        return $this->getRowFromQuery($query);
     }
 
     /*
@@ -390,19 +369,19 @@ class DbManager
     **  @param array fields -- array of fields 
     **  @param associative array optional $where  --   where condition 
     */
-    public function row($table,$fields,$where=array()){
+    public function row($table,array $fields, $where=array()){
         
-        return $this->getRow($this->selectFromArray($table,$fields,$where));
+        return $this->getRow($this->selectFromArray($table, $fields, $where));
     }
 
-    public function value($table,$field,$where=array()){
-        $row=$this->row($table,array($field),$where);
+    public function value($table, $field, $where=array()){
+        $row = $this->row($table, array($field), $where);
         $value = reset($row);
         return $value;
     }
 
-    public function column($table,$field,$where=array()){
-        $rows = $this->multiRows($table,array($field),$where);
+    public function column($table, $field, $where=array()){
+        $rows = $this->multiRows($table, array($field), $where);
         return $this->convertRowsToColumn($rows);
     }
 
@@ -455,9 +434,9 @@ class DbManager
     **  @param array fields -- array of fields 
     **  @param associative array optional $where  --   where condition 
     */
-    public function multiRows($table,$fields,$where=array()){
-        
-        return $this->getMultiRow($this->selectFromArray($table,$fields,$where));        
+    public function multiRows($table,array $fields, $where=array())
+    {
+        return $this->getMultiRow($this->selectFromArray($table, $fields, $where));        
     }
 
 
@@ -466,13 +445,14 @@ class DbManager
     **  @param string  $table   --  table name
     **  @param associative array optional $where  --   where condition 
     */
-    public function delete($table,$where=array()){
-        if(empty($where)){
+    public function delete($table, $where=array())
+    {
+        if (empty($where)) {
             return $this->query($query);
         }
-        $where_condition=$this->getPreparingWhereCondition($where);
-        $query=  "DELETE FROM $table ".$where_condition;
-        return $this->safeQuery($query,array_values($where));
+        $where_condition = $this->getPreparingWhereCondition($where);
+        $query = "DELETE FROM $table ".$where_condition;
+        return $this->safeQuery($query, array_values($where));
     }
 
     /*
@@ -493,24 +473,21 @@ class DbManager
     **  @param (array or string) (optional) paramType --  types of bind params
     **  @returns result of query
     */
-    public function safeQuery($query,$bindParams,$paramType=NULL)
+    public function safeQuery($query, $bindParams, $paramType=NULL)
     {
-        $this->setLastQuery($query);
-        //echo $query."<br/>";
-        
+        $this->setLastQuery($query);       
         if (!is_array($bindParams)) {
             $bindParams = array($bindParams);
         }
-        //print_r($bindParams);
         $stmt = $this->mysqli->prepare($query);
         if ($this->isArrayAssoc($bindParams)) {
-            foreach($bindParams as $key=>$value){
-                $stmt->bind_param($key,$value);
+            foreach ($bindParams as $key => $value) {
+                $stmt->bind_param($key, $value);
             }
         } else {
            if (!is_null($paramType)) {
                 if (is_array($paramType)) {
-                    $params[0] = implode("",$paramType);
+                    $params[0] = implode("", $paramType);
                 } else {
                     $params[0] = $paramType;        
                 }
@@ -533,13 +510,11 @@ class DbManager
         if (!$stmt->execute()) {
             return FALSE;
         }
-        if (stripos($query,"SELECT") !== FALSE) {
+        if (stripos($query, "SELECT") !== FALSE) {
             $return_value = $stmt->get_result();             
         } else {
             $return_value = TRUE;
         }
-        //var_dump($params);
-        //echo "<br/>";
         $stmt->free_result();
         $stmt->close();
         return $return_value;
@@ -553,11 +528,10 @@ class DbManager
     **  @param (array or string) (optional) paramType --  types of bind params
     **  @returns one or more rows based on @param $numRows
     */
-    private function prepareSelect($numRows,$query,$bindParams,$paramType){
+    private function prepareSelect($numRows, $query, $bindParams, $paramType){
        
-        $query_result=$this->safeQuery($query,$bindParams,$paramType);
-        
-        if($numRows==1){
+        $query_result = $this->safeQuery($query, $bindParams, $paramType);
+        if ($numRows == 1) {
             $results = $this->getRow($query_result);    
         }else{
             $results = $this->getMultiRow($query_result);    
@@ -572,8 +546,8 @@ class DbManager
     **  @param (array or string) (optional) paramType --  types of bind params
     **  @returns multiple rows 
     */
-    public function prepareMultiRow($query,$bindParams,$paramType=NULL){
-        return $this->prepareSelect(2,$query,$bindParams,$paramType);
+    public function prepareMultiRow($query, $bindParams, $paramType=NULL){
+        return $this->prepareSelect(2, $query, $bindParams, $paramType);
     }
 
     /*
@@ -583,8 +557,8 @@ class DbManager
     **  @param (array or string) (optional) paramType --  types of bind params
     **  @returns one row 
     */
-    public function prepareRow($query,$bindParams,$paramType=NULL){
-        return $this->prepareSelect(1,$query,$bindParams,$paramType);
+    public function prepareRow($query, $bindParams, $paramType=NULL){
+        return $this->prepareSelect(1, $query, $bindParams, $paramType);
     }
 
     /*
@@ -594,8 +568,8 @@ class DbManager
     **  @param (array or string) (optional) paramType --  types of bind params
     **  @returns a value 
     */
-    public function prepareValue($query,$bindParams,$paramType=NULL){
-        $row = $this->prepareRow($query,$bindParams,$paramType);
+    public function prepareValue($query, $bindParams, $paramType=NULL){
+        $row = $this->prepareRow($query, $bindParams, $paramType);
         return reset($row);
     }
 
@@ -606,8 +580,8 @@ class DbManager
     **  @param (array or string) (optional) paramType --  types of bind params
     **  @returns array of values 
     */
-    public function prepareColumn($query,$bindParams,$paramType=NULL){
-        return $this->convertRowsToColumn($this->prepareRow($query,$bindParams,$paramType=NULL));
+    public function prepareColumn($query, $bindParams, $paramType=NULL){
+        return $this->convertRowsToColumn($this->prepareRow($query, $bindParams, $paramType=NULL));
     }
 
     /*
@@ -659,7 +633,7 @@ class DbManager
     }
 
     private function isArrayAssoc($array){
-        return (bool)count(array_filter(array_keys($array), 'is_string'));
+        return (bool) count(array_filter(array_keys($array), 'is_string'));
     }
 
 }
