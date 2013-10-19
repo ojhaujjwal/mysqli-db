@@ -100,7 +100,7 @@ $value=$db->column($table,$field_name,$where);
 
 
 
-### Prepared Statements
+## Prepared Statements
 The above methods using query such as getRowFromQuery and getMultiRowFromQuery are slightly insecure. So a new method, safeQuery has been added !
 
 ```php 
@@ -130,7 +130,7 @@ The above only returns result and is not suitable for select statements, but onl
 For prepared select statements, use <span>prepareRow</span> or <span>prepareMultiRow</span>.
 
 
-### prepareRow
+##### prepareRow
  
 This is used to fetch a row and returns result similiar to row!
 
@@ -142,7 +142,7 @@ print_r($user_data);
 
 
 
-### prepareMultiRow
+##### prepareMultiRow
  
 This is used to fetch multiple rows and returns result similiar to getMultiRowFromArray!
 
@@ -154,7 +154,7 @@ print_r($posts); // will print array
 
 
 
-### prepareValue
+##### prepareValue
  
 This is used to get value from prepared query!
 
@@ -164,7 +164,7 @@ $name=$db->prepareValue("select name from user where user_id=?",$user_id,"i");
 echo $name; // will print name
 ```
 
-### prepareColumn
+##### prepareColumn
  
 This is used to get a column from prepared query!
 
