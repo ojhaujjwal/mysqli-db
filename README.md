@@ -42,7 +42,7 @@ $res = $db->update($table, $data, $where);
 This sets value of column1 as value1,column2 as value2 and so on!
 
 
-You can specify where condition in $where array(optional)
+You can specify where condition in `$where` array(optional)
 ```php
 $where = array("id"=>"1");//This update only those rows whose id column has value 1;
 ```       
@@ -53,7 +53,7 @@ To get the number of results::
 ```php   
 $num = $db->countRows($table, $where); 
 ```  
-You can specify where condition in $where array(optional)
+You can specify where condition in `$where` array(optional)
 ```php  
 $where = array("id"=>"1");//This counts only those rows whose id column has value 1;
 ``` 
@@ -64,11 +64,11 @@ To get a row:
 ```php
 $row = $db->row($table, $fields, $where);
 ```  
-You can specify where condition in $where array(optional)
+You can specify where condition in `$where` array(optional)
 ```php
 $where = array("id"=>"1");//This returns the row whose id column has value 1;
 ```      
-The result $row is an associative array whose key are fields of array $fields and value maps to the resuls from query
+The result `$row` is an associative array whose key are fields of array `$fields` and value maps to the resuls from query
 
    
 You can also get row in the same format by using query like --
@@ -90,7 +90,7 @@ To get multiple rows you can use array format or from query:
 $rows = $db->multiRows($table, $fields, $where);// $where is optional as always
 $rows = $db->getMultiRowFromQuery($query);
 ```  
-The result, $rows is a numerical array.
+The result, `$rows` is a numerical array.
 
 ### Fetching a single Column
 To fetch a single column:
@@ -102,7 +102,7 @@ $value = $db->column($table, $field_name, $where);
 
 
 ## Prepared Statements
-The above methods using query such as getRowFromQuery and getMultiRowFromQuery are slightly insecure. So a new method, safeQuery has been added !
+The above methods using query such as `getRowFromQuery` and `getMultiRowFromQuery` are slightly insecure. So a new method, `safeQuery` has been added !
 
 ```php 
 $result = $db->safeQuery($query, $bindParams, $paramType);// $paramType is optional!
@@ -114,7 +114,7 @@ For example, to update a table, posts:
 $result = $db->safeQuery("update posts set post_text=?", $post_text); 
 ```
 
-In case of binding multiple variables, second parameter, $bindParams should be an array.
+In case of binding multiple variables, second parameter, `$bindParams` should be an array.
 
 For example, to update a user`s posts from table, posts: 
 ```php
@@ -128,7 +128,7 @@ The above only returns result and is not suitable for select statements, but onl
 
 ### Prepared Select  Statements
 
-For prepared select statements, use <span>prepareRow</span> or <span>prepareMultiRow</span>.
+For prepared select statements, use `prepareRow` or `prepareMultiRow`.
 
 
 ##### prepareRow
@@ -145,7 +145,7 @@ print_r($user_data);
 
 ##### prepareMultiRow
  
-This is used to fetch multiple rows and returns result similiar to getMultiRowFromArray!
+This is used to fetch multiple rows and returns result similiar to `multiRow`!
 
 For example to get list of user`s posts from table post!
 ```php
