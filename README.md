@@ -72,7 +72,7 @@ The result $row is an associative array whose key are fields of array $fields an
    
 You can also get row in the same format by using query like --
 ```php 
-$row = $db->getRowFromQuery("select name from user where  id='1';");
+$row = $db->getRowFromQuery("select * from user where  id='1';");
 ```  
 
 ### Fetching a single value
