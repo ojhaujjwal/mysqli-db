@@ -135,7 +135,7 @@ class DbManager
     */
     public function __get($name)
     {
-        if(property_exists(array($this, $name))){
+        if(property_exists(array($this->mysqli, $name))){
             return $this->mysqli->$name;
         }
         throw new \Exception("Called to undefined property $name!");
