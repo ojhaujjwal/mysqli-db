@@ -135,7 +135,7 @@ class DbManager
     */
     public function __get($name)
     {
-        if (property_exists(array($this->mysqli, $name))) {
+        if(property_exists(array($this->mysqli, $name))){
             return $this->mysqli->$name;
         }
         throw new \Exception("Called to undefined property $name!");
@@ -373,7 +373,7 @@ class DbManager
     private function getRow($res)
     {
         
-        if ($res && $res->num_rows !== 1) {
+        if ($res && $res->num_rows > 1) {
             throw new \BadMethodCallException("Query returns more than row!");
         } else {  
             $rows = $this->getMultiRow($res);
@@ -675,6 +675,11 @@ class DbManager
         return $arr;
     }
 
+
+    /*
+    **  @function isArrayAssoc  --  used to check is array is associative
+    **  @returns true if array is associative, else not
+    */
     private function isArrayAssoc($array){
         return (bool) count(array_filter(array_keys($array), 'is_string'));
     }
