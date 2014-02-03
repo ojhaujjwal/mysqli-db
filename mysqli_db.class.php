@@ -29,7 +29,7 @@ class DbManager
     */
     public  function __construct($hostname, $dbUser, $dbPassword, $dbname = NULL)
     {
-        $this->connect($hostname, $dbUser, $dbPassword);        
+        $this->connect($hostname, $dbUser, $dbPassword, $dbname);        
     }
     /*
     **  @function connect    --  initiates connection with mysql
