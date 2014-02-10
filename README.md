@@ -174,3 +174,7 @@ For example to get list of user`s post_text from post table!
 $post_text = $db->prepareColumn("select post_text from post where user_id=?", $user_id, "i");
 print_r($post_text); // will print array
 ```
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/ojhaujjwal/mysqli-db/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
