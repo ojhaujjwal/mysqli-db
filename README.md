@@ -7,7 +7,7 @@ An easy to use mysqli class with php!
 
 Connecting mysql can be done by calling class!
 ```php
-$db = new \library\Mysqli\DbManager("hostname", "dbuser", "dbpassword", "db_name"); 
+$db = new Mysqli\DbManager("hostname", "dbuser", "dbpassword", "db_name"); 
 //db_name is optional
 ```
 
