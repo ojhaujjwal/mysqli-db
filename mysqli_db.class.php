@@ -1,5 +1,5 @@
 <?php
-namespace library\Mysqli;
+namespace Mysqli;
 
 class DbManager
 {
