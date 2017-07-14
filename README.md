@@ -3,8 +3,15 @@ mysqli-db
 
 An easy to use mysqli class with php!
 
+## Deprecated
+This library is not maintainted anymore. There are a lot of much better libraries which you can use:
 
+* [paragonie/easydb](https://github.com/paragonie/easydb) - Closest alternative
+* [doctrine/dbal](https://github.com/doctrine/dbal) - Powerful database abstraction layer of Doctrine
+* [zendframework/zend-db](https://github.com/zendframework/zend-db) - Database abstraction layer, SQL abstraction of Zend
+* [illuminate/database](https://github.com/illuminate/database)- Database component of Laravel with an expressive query builder
 
+## Documentation
 Connecting mysql can be done by calling class!
 ```php
 $db = new Mysqli\DbManager("hostname", "dbuser", "dbpassword", "db_name"); 
